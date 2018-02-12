@@ -1,0 +1,45 @@
+﻿using System;
+using System.Data;
+using Npgsql;
+using System.Data.SqlClient;
+using System.Collections.Generic;
+using Dapper;
+
+namespace ThreeDo.DbContext
+{
+	public class ConnectionFactory
+	{
+
+		public IDbConnection GetDapperConnection
+		{
+			get
+			{
+                var c = Environment.GetEnvironmentVariable("ConnectionString");
+				return new NpgsqlConnection(Environment.GetEnvironmentVariable("ConnectionString"));
+
+			}
+		}
+
+		public bool ExecuteProc(string sql, List<SqlParameter> paramList = null)
+		{
+
+			try
+			{
+				using (IDbConnection conn = GetDapperConnection)
+				{
+					DynamicParameters dp = new DynamicParameters();
+					if (paramList != null)
+						foreach (SqlParameter sp in paramList)
+							dp.Add(sp.ParameterName, sp.SqlValue, sp.DbType); 
+					conn.Open();
+					return conn.Execute(sql, dp, commandType: CommandType.StoredProcedure) > 0;
+				}
+			}
+			catch (Exception)
+			{
+				//do logging
+				return false;
+			}
+		}
+	}
+}
