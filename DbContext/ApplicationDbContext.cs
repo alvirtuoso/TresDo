@@ -11,11 +11,6 @@ namespace ThreeDo.DbContext
 			
 		}
 
-		//public DbSet<Person> People { get; set; }
-		//public DbSet<Course> Courses { get; set; }
-		//public DbSet<Enrollment> Enrollments { get; set; }
-		//public DbSet<Student> Students { get; set; }
-
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
 			base.OnConfiguring(optionsBuilder);

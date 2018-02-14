@@ -1,0 +1,149 @@
+﻿// Start Postgres server -        start @ terminal	initdb /usr/local/var/postgres -E utf8
+// *********** NPSQL entity framework ****************
+1 search for Npgsql.EntityFrameworkCore  in nuget
+2 services.AddEntityFramework()
+    .AddNpgsql()
+    .AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(Configuration["Data:DefaultConnection:ConnectionString"]));
+
+
+public class ApplicationDbContext : DbContext
+{
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        :base(options)
+    {
+
+    }
+
+    public DbSet<Person> People { get; set; }
+    public DbSet<Course> Courses { get; set; }
+    public DbSet<Enrollment> Enrollments { get; set; }
+    public DbSet<Student> Students { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+    }
+}
+
+Well your Product class must be defined such as to match the result coming back from the query. So what you can do is -
+
+public IEnumerable<Product> GetProducts(int categoryId)
+{
+    var connection = DataContext.Database.Connection;
+
+    var sql = "SELECT * FROM products WHERE category_id = @categoryId";
+
+    var result = connection.Query<Product>(sql, new { categoryId }).Select(p => new Product {
+           Id = (int)p.ProductId,
+           Name = (string)p.ProductName,
+           CategoryId  = (int)p.ProductCategoryId
+        });
+
+    return result;
+}
+
+// ******** NG2 element DOm ************
+
+
+import {ElementRef} from '@angular/core';
+
+@component({
+		template: `<input #someVar />`
+})
+
+    @ViewChild('someVar') el:ElementRef;
+
+
+constructor(private rd: Renderer) {}
+
+  ngAfterViewInit() {
+    this.rd.invokeElementMethod(this.el.nativeElement,'focus');
+  }
+//*****
+@ViewChild("someVar")
+set myInput(_input: ElementRef | undefined) {
+
+            this._renderer.invokeElementMethod(_input.nativeElement, "focus"); 
+}
+
+// ****
+
+// ********** end of NG2 **************
+
+
+// *********** Dapper Reference ********
+DynamicParameters p = new DynamicParameters(song);
+
+by adding the song object to the DynamicParameters constructor, a DynamicParameters template is created which will automatically convert all properties to parameters. Then I can simply add my two output parameters and execute the sproc:
+
+p.Add("@success_updated", dbType: DbType.Boolean, direction: ParameterDirection.Output);
+p.Add("@success_added", dbType: DbType.Boolean, direction: ParameterDirection.Output);
+dbConn.Execute("Test_UpdateSong", p, commandType: CommandType.StoredProcedure);
+// get my output parameters...
+var success_added = p.Get<bool>("@success_Added");
+var success_added = p.Get<bool>("@success_Updated");
+
+// ********************************** Dapper ends *********************************************
+
+// ************ Postgress StoredProcedure example ***************************************
+CREATE OR REPLACE FUNCTION new_client(lastn character varying, firstn character varying)
+  RETURNS integer AS
+$BODY$
+DECLARE
+   v_id integer;
+BEGIN
+   -- Inserts the new person record and retrieves the last inserted id
+   INSERT INTO person(lastname, firstname)
+   VALUES (lastn, firstn)
+   RETURNING id INTO v_id;
+
+   -- Inserts the new client and references the inserted person
+   INSERT INTO client(id) VALUES (v_id);
+
+   -- Return the new id so we can use it in a select clause or return the new id into the user application
+    RETURN v_id;
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE;
+
+  // ***************************** Ends Postgress StoredProcedure *********************************
+
+
+  // ***********************************  Jquery + Angular2   **************************
+  You could also load your jQuery Javascript file in a normal script tag in the head section of your index.html.
+
+<html>
+    <head>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js" />
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/semantic.min.js" />
+
+        ...
+    </head>
+    ...
+Then in the component or directive where you need it, just declare the $ variable needed for jQuery, since you won't have the typings for all the plugins you need:
+
+import {Directive} from '@angular/core';
+
+declare var $: any;
+
+@Directive({
+    selector: "my-first-directive"
+})
+
+export class MyFirstDirective {
+    constructor() {
+        $(document).ready(function () {
+            alert("Hello World");
+        });
+    }
+}
+// *********************************** Jquery + Angular2 Ends *************************************
+
+// *********************** Json SerializerSettings **********************
+services.AddMvc()
+    .AddJsonOptions(options => {
+        options.SerializerSettings.ReferenceLoopHandling =
+            Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+    });
+// ***********************************  End of Json SerializerSettings ***********************************

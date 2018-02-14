@@ -4,6 +4,8 @@ using Npgsql;
 using System.Data.SqlClient;
 using System.Collections.Generic;
 using Dapper;
+using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace ThreeDo.DbContext
 {
@@ -14,8 +16,9 @@ namespace ThreeDo.DbContext
 		{
 			get
 			{
-                var c = Environment.GetEnvironmentVariable("ConnectionString");
-				return new NpgsqlConnection(Environment.GetEnvironmentVariable("ConnectionString"));
+                var con = ConnectionSetting.DefaultConnection;
+       
+				return new NpgsqlConnection(con);
 
 			}
 		}

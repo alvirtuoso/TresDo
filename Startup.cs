@@ -8,14 +8,23 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using ThreeDo.DbContext;
 
 namespace ThreeDo
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IHostingEnvironment env)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                // ASP.net: Environment variables are used when present, 
+                // otherwise appsettings.json variables will be used. Both places must have the same variables and must implement AddEnvironmentVariables().
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
+            Configuration = builder.Build();
+
         }
 
         public IConfiguration Configuration { get; }
@@ -29,12 +38,17 @@ namespace ThreeDo
             {
                 options.AddPolicy("CorsPolicy",
                     builder => builder.AllowAnyOrigin()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowAnyHeader()
                     .AllowCredentials());
             });
             // do some other work
             services.AddOptions();
+
+            // Register the IConfiguration instance which AppOptions binds against.
+            services.Configure<AppOptions>(Configuration);
+
+            ConnectionSetting.DefaultConnection = Configuration.GetConnectionString("DefaultConnection");
 
             // Add the MVC feature
             services.AddMvcCore()
