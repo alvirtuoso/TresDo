@@ -1,5 +1,5 @@
 ﻿// Start Postgres server -        start @ terminal	initdb /usr/local/var/postgres -E utf8
-// *********** NPSQL entity framework ****************
+// *********** NPSQL entity framework *****************
 1 search for Npgsql.EntityFrameworkCore  in nuget
 2 services.AddEntityFramework()
     .AddNpgsql()
