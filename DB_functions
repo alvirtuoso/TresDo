@@ -1,0 +1,404 @@
+-- FUNCTION: public.fn_add_item_to_card(text, timestamp with time zone, text, uuid, uuid, uuid, integer)
+
+-- DROP FUNCTION public.fn_add_item_to_card(text, timestamp with time zone, text, uuid, uuid, uuid, integer);
+
+CREATE OR REPLACE FUNCTION public.fn_add_item_to_card(
+	_title text,
+	_due_date timestamp with time zone,
+	_description text,
+	_card_id uuid,
+	_owner_id uuid,
+	_modified_by_id uuid,
+	_status_id integer)
+    RETURNS SETOF public.item
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+    ROWS 1000.0
+AS $function$
+
+    DECLARE 
+     oitem_id UUID:= gen_random_uuid();
+     sort_index integer:= (Select Count(*) From public.item i WHERE i.card_id = _card_id);
+    BEGIN
+
+      INSERT INTO public.item(item_id, date_created, due_date, title, description, card_id, owner_id, modified_by_id, status_id, date_modified, sort_order)
+      VALUES (oitem_id, now(), _due_date, _title, _description, _card_id, _owner_id, _modified_by_id, _status_id, now(), sort_index);
+      
+      RETURN QUERY SELECT * FROM public.item i WHERE i.card_id = _card_id;
+      
+    END;
+    
+
+$function$;
+
+
+
+-- FUNCTION: public.gen_random_uuid()
+
+-- DROP FUNCTION public.gen_random_uuid();
+
+CREATE OR REPLACE FUNCTION public.gen_random_uuid(
+	)
+    RETURNS uuid
+    LANGUAGE 'c'
+    COST 1.0
+    VOLATILE NOT LEAKPROOF 
+AS '$libdir/pgcrypto', 'pg_random_uuid';
+
+-- FUNCTION: public.fn_add_board(character varying, uuid, uuid)
+
+-- DROP FUNCTION public.fn_add_board(character varying, uuid, uuid);
+
+CREATE OR REPLACE FUNCTION public.fn_add_board(
+	_title character varying,
+	_owner_id uuid,
+	_classification_id uuid)
+    RETURNS TABLE(board_id uuid, title text, owner_id uuid, date_created timestamp with time zone, classification_id uuid, initial_card_id uuid)
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+    ROWS 1000.0
+AS $function$
+
+    DECLARE 
+     oboard_id UUID:= gen_random_uuid();
+     ocard_id UUID:= gen_random_uuid();
+
+    BEGIN
+      INSERT INTO public.board 
+        VALUES (_title, now(), oboard_id, _owner_id, _classification_id);     
+
+      INSERT INTO public.card(card_id, name, date_created, active, board_id, owner_id, sort_order)
+      VALUES (ocard_id, 'New Card', now(), true, oboard_id, _owner_id, 0); -- we are creating a new card, so sort_order or index is 0 
+      
+      RETURN QUERY SELECT c.board_id, b.title, b.owner_id, b.date_created, b.classification_id, c.card_id from public.board b
+		JOIN public.card c on b.board_id = c.board_id 
+	  WHERE b.board_id = oboard_id;
+      
+    END;
+    
+
+$function$;
+
+-- FUNCTION: public.fn_add_card(character varying, uuid, uuid, boolean)
+
+-- DROP FUNCTION public.fn_add_card(character varying, uuid, uuid, boolean);
+
+CREATE OR REPLACE FUNCTION public.fn_add_card(
+	_name character varying,
+	_owner_id uuid,
+	_board_id uuid,
+	_active boolean)
+    RETURNS TABLE(name text, date_created timestamp with time zone, active boolean, sort_order integer, card_id uuid, board_id uuid, owner_id uuid)
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+    ROWS 1000.0
+AS $function$
+
+    DECLARE 
+     ocard_id UUID:= gen_random_uuid();
+     _sort integer:= (SELECT COUNT(*) FROM public.card _c WHERE _c.board_id = _board_id);
+    BEGIN
+      INSERT INTO public.card 
+        VALUES (_name, now(), _active, _sort, ocard_id, _board_id, _owner_id);     
+      
+      RETURN QUERY 
+      SELECT * FROM public.card c WHERE c.card_id = ocard_id;
+      
+    END;
+    
+
+$function$;
+
+-- FUNCTION: public.fn_add_item(character varying, timestamp with time zone, text, uuid, uuid, uuid, integer)
+
+-- DROP FUNCTION public.fn_add_item(character varying, timestamp with time zone, text, uuid, uuid, uuid, integer);
+
+CREATE OR REPLACE FUNCTION public.fn_add_item(
+	_title character varying,
+	_due_date timestamp with time zone,
+	_description text,
+	_card_id uuid,
+	_owner_id uuid,
+	_modified_by_id uuid,
+	_status_id integer)
+    RETURNS TABLE(date_created timestamp with time zone, due_date timestamp with time zone, title text, description text, status_id integer, date_modified timestamp with time zone, card_id uuid, owner_id uuid, modified_by_id uuid, item_id uuid, sort_order integer)
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+    ROWS 1000.0
+AS $function$
+
+    DECLARE 
+     oitem_id UUID:= gen_random_uuid();
+   	 sort_index integer:= (Select Count(*) From public.item i WHERE i.card_id = _card_id);
+    BEGIN
+
+      INSERT INTO public.item(item_id, date_created, due_date, title, description, status_id, date_modified, card_id, owner_id, modified_by_id, sort_order )
+      VALUES (oitem_id, now(), _due_date, _title, _description, _status_id, now(), _card_id, _owner_id, _modified_by_id, sort_index + 1);
+      
+      RETURN QUERY 
+      SELECT *
+      FROM public.item i WHERE i.item_id = oitem_id;
+      
+    END;
+    
+
+$function$;
+
+
+-- FUNCTION: public.fn_add_item_media_data(uuid, uuid)
+
+-- DROP FUNCTION public.fn_add_item_media_data(uuid, uuid);
+
+CREATE OR REPLACE FUNCTION public.fn_add_item_media_data(
+	_item_id uuid,
+	_media_id uuid)
+    RETURNS void
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+AS $function$
+
+    BEGIN
+
+      INSERT INTO public.item_media_data(item_id, media_data_id)
+      VALUES(_item_id, _media_id);
+      
+    END;
+    
+
+$function$;
+
+-- FUNCTION: public.fn_add_media_item(text, text, bytea)
+
+-- DROP FUNCTION public.fn_add_media_item(text, text, bytea);
+
+CREATE OR REPLACE FUNCTION public.fn_add_media_item(
+	_file_ext text,
+	_filename text,
+	_data bytea)
+    RETURNS uuid
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+AS $function$
+
+    DECLARE 
+     omedia_id UUID:= gen_random_uuid();
+    BEGIN
+      INSERT INTO public.media_data (data, file_extension, media_data_id, filename)
+      VALUES(_data, _file_ext, omedia_id, _filename);
+      
+      RETURN omedia_id;
+      
+    END;
+    
+
+$function$;
+
+-- FUNCTION: public.fn_add_user(character varying, text)
+
+-- DROP FUNCTION public.fn_add_user(character varying, text);
+
+CREATE OR REPLACE FUNCTION public.fn_add_user(
+	_email character varying,
+	_display_name text)
+    RETURNS TABLE(first_name text, last_name text, email text, address text, city text, zip text, cell text, phone text, active boolean, membership_id uuid, user_id uuid, display_name text)
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+    ROWS 1000.0
+AS $function$
+
+    DECLARE 
+     ouserid UUID:= gen_random_uuid();
+   	 -- counter integer = (Select count(*) from public.user u Where u.email = _email);
+    BEGIN
+              
+    		INSERT into public.user (user_id, email, display_name)
+			SELECT ouserid, _email, _display_name		
+			WHERE not exists (select u.email from public.user u where u.email = _email);
+     		
+        RETURN QUERY
+      		Select * from public.user usr WHERE usr.email = _email;
+    END;
+    
+
+$function$;
+
+-- FUNCTION: public.fn_archive_item(uuid)
+
+-- DROP FUNCTION public.fn_archive_item(uuid);
+
+CREATE OR REPLACE FUNCTION public.fn_archive_item(
+	_item_id uuid)
+    RETURNS void
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+AS $function$
+
+    BEGIN
+      INSERT INTO public.archive_item (date_created, title, description, status_id, date_modified, card_id, owner_id, modified_by_id, item_id, sort_order, due_date)
+          SELECT * FROM public.item i WHERE NOT EXISTS (SELECT 1 FROM archive_item WHERE item_id = _item_id);
+      
+      DELETE FROM public.item WHERE item_id = _item_id;  
+      
+    END;
+    
+
+$function$;
+
+-- FUNCTION: public.fn_delete_card(uuid)
+
+-- DROP FUNCTION public.fn_delete_card(uuid);
+
+CREATE OR REPLACE FUNCTION public.fn_delete_card(
+	_card_id uuid)
+    RETURNS void
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+AS $function$
+
+   
+    BEGIN
+
+    DELETE FROM public.item
+	WHERE card_id = _card_id;
+    
+	DELETE from public.card 
+    WHERE card_id = _card_id;
+          
+    END;
+    
+
+$function$;
+
+-- FUNCTION: public.fn_get_media_by_item_id(uuid)
+
+-- DROP FUNCTION public.fn_get_media_by_item_id(uuid);
+
+CREATE OR REPLACE FUNCTION public.fn_get_media_by_item_id(
+	_item_id uuid)
+    RETURNS TABLE(media_data_id uuid, filename text, file_extension text, item_id uuid)
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+    ROWS 1000.0
+AS $function$
+
+    BEGIN
+
+RETURN QUERY
+	select m.media_data_id, m.filename, m.file_extension, i.item_id from public.media_data m JOIN item_media_data im
+	ON m.media_data_id = im.media_data_id JOIN item i 
+	ON i.item_id = im.item_id
+	WHERE COALESCE(m.data, '') != ''
+	AND i.item_id = _item_id;
+
+      
+    END;
+    
+
+$function$;
+
+-- FUNCTION: public.fn_get_media_byte_by_id(uuid)
+
+-- DROP FUNCTION public.fn_get_media_byte_by_id(uuid);
+
+CREATE OR REPLACE FUNCTION public.fn_get_media_byte_by_id(
+	_mediaid uuid)
+    RETURNS bytea
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+AS $function$
+
+    DECLARE 
+     _data bytea:= (SELECT m.data FROM public.media_data m WHERE m.media_data_id = _mediaid);
+    BEGIN
+      
+      
+      RETURN _data;
+      
+    END;
+    
+
+$function$;
+
+-- FUNCTION: public.fn_update_card(uuid, text, uuid, boolean, uuid)
+
+-- DROP FUNCTION public.fn_update_card(uuid, text, uuid, boolean, uuid);
+
+CREATE OR REPLACE FUNCTION public.fn_update_card(
+	_card_id uuid,
+	_name text,
+	_owner_id uuid,
+	_active boolean,
+	_board_id uuid)
+    RETURNS TABLE(card_id uuid, name text, date_created timestamp with time zone, active boolean, board_id uuid, owner_id uuid, sort_order integer)
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+    ROWS 1000.0
+AS $function$
+
+   
+    BEGIN
+	  UPDATE public.card c    
+      SET name = _name, active = _active, owner_id = _owner_id, board_id = _board_id
+      WHERE c.card_id = _card_id;
+      
+      RETURN QUERY SELECT * FROM public.card c WHERE c.board_id = _board_id;
+      
+    END;
+    
+
+$function$;
+
+-- FUNCTION: public.fn_update_item(uuid, text, integer, uuid, uuid, integer)
+
+-- DROP FUNCTION public.fn_update_item(uuid, text, integer, uuid, uuid, integer);
+
+CREATE OR REPLACE FUNCTION public.fn_update_item(
+	_item_id uuid,
+	_title text,
+	_status_id integer,
+	_card_id uuid,
+	_modified_by_id uuid,
+	_sort_order integer)
+    RETURNS void
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+AS $function$
+
+    DECLARE 
+     item_to_update_index integer:= (Select sort_order FROM public.item WHERE item_id = _item_id);
+    BEGIN
+    -- Switch the sort-order of the item to update with the sort-order of the target. Ex. itemX.sort_order switches to itemY.sort_order
+	  UPDATE public.item
+      SET sort_order = item_to_update_index
+      WHERE sort_order = _sort_order;
+      
+      UPDATE public.item
+      SET title = _title
+      , status_id = _status_id
+      , card_id = _card_id
+      , modified_by_id = _modified_by_id
+      , sort_order = _sort_order;
+      
+     
+      
+    END;
+    
+
+$function$;
+
+-- extension to use get_random_UUID()
+CREATE EXTENSION IF NOT EXISTS pgcrypto; 
+

@@ -12,7 +12,7 @@ namespace ThreeDo.Controllers
 		private readonly CardRepository cardRepo = new CardRepository();
 
 
-		// GET api/card/5
+		// GET api/card/id/5
 		[HttpGet("id/{id}")]
 		public Card Get(Guid id)
 		{
@@ -24,8 +24,8 @@ namespace ThreeDo.Controllers
 			return this.cardRepo.FindByID(id);
 		}
 
-		// api/card
-		[HttpGet("cards_by_board_id/{boardid}")]
+        // api/card/{boardid}
+		[HttpGet("{boardid}")]
 		public IEnumerable<Card> FindCardsByBoardId(Guid boardId)
 		{
 			var cards = this.cardRepo.FindByBoardId(boardId);

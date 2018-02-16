@@ -1,0 +1,452 @@
+-- Table: public.account
+
+-- DROP TABLE public.account;
+
+CREATE TABLE IF NOT EXISTS public.account
+(
+    name text COLLATE pg_catalog."default",
+    account_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    plan_id uuid,
+    CONSTRAINT account_pkey PRIMARY KEY (account_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.action
+
+-- DROP TABLE public.action;
+
+CREATE TABLE IF NOT EXISTS public.action
+(
+    name character varying(50) COLLATE pg_catalog."default",
+    action_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    CONSTRAINT action_pkey PRIMARY KEY (action_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.archive_item
+
+-- DROP TABLE public.archive_item;
+
+CREATE TABLE IF NOT EXISTS public.archive_item
+(
+    archive_item_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    date_created timestamp with time zone DEFAULT now(),
+    date_archived timestamp with time zone DEFAULT now(),
+    title text COLLATE pg_catalog."default" DEFAULT 'untitled'::text,
+    description text COLLATE pg_catalog."default",
+    status_id integer,
+    date_modified timestamp with time zone,
+    card_id uuid NOT NULL,
+    owner_id uuid,
+    modified_by_id uuid,
+    item_id uuid NOT NULL,
+    sort_order integer,
+    due_date timestamp with time zone
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.board
+
+-- DROP TABLE public.board;
+
+CREATE TABLE IF NOT EXISTS public.board
+(
+    title text COLLATE pg_catalog."default" NOT NULL DEFAULT 'untitled'::text,
+    date_created timestamp with time zone DEFAULT now(),
+    board_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    owner_id uuid NOT NULL,
+    classification_id uuid,
+    CONSTRAINT board_pkey PRIMARY KEY (board_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.card
+
+-- DROP TABLE public.card;
+
+CREATE TABLE IF NOT EXISTS public.card
+(
+    name text COLLATE pg_catalog."default" NOT NULL DEFAULT 'unnamed'::text,
+    date_created timestamp with time zone DEFAULT now(),
+    active boolean NOT NULL DEFAULT true,
+    sort_order integer DEFAULT nextval('card_order_seq'::regclass),
+    card_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    board_id uuid,
+    owner_id uuid NOT NULL,
+    description text COLLATE pg_catalog."default",
+    CONSTRAINT card_pkey PRIMARY KEY (card_id),
+    CONSTRAINT card_board_id_fkey FOREIGN KEY (board_id)
+        REFERENCES public.board (board_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.checklist
+
+-- DROP TABLE public.checklist;
+
+CREATE TABLE IF NOT EXISTS public.checklist
+(
+    list_item text COLLATE pg_catalog."default",
+    checked boolean,
+    checklist_id uuid DEFAULT gen_random_uuid(),
+    item_id uuid
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.classification
+
+-- DROP TABLE public.classification;
+
+CREATE TABLE IF NOT EXISTS public.classification
+(
+    name text COLLATE pg_catalog."default" DEFAULT 'public'::text,
+    classification_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    CONSTRAINT classification_pkey PRIMARY KEY (classification_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.company
+
+-- DROP TABLE public.company;
+
+CREATE TABLE IF NOT EXISTS public.company
+(
+    name text COLLATE pg_catalog."default",
+    account_id uuid,
+    company_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    CONSTRAINT company_pkey PRIMARY KEY (company_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public."group"
+
+-- DROP TABLE public."group";
+
+CREATE TABLE IF NOT EXISTS public."group"
+(
+    name text COLLATE pg_catalog."default",
+    description text COLLATE pg_catalog."default",
+    group_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    CONSTRAINT group_pkey PRIMARY KEY (group_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.item
+
+-- DROP TABLE public.item;
+
+CREATE TABLE IF NOT EXISTS public.item
+(
+    date_created timestamp with time zone DEFAULT now(),
+    title text COLLATE pg_catalog."default" DEFAULT 'untitled'::text,
+    description text COLLATE pg_catalog."default",
+    status_id integer,
+    date_modified timestamp with time zone DEFAULT now(),
+    card_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    owner_id uuid,
+    modified_by_id uuid,
+    item_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    sort_order integer DEFAULT nextval('item_order_seq'::regclass),
+    due_date timestamp with time zone,
+    CONSTRAINT item_pkey PRIMARY KEY (item_id),
+    CONSTRAINT item_card_id_fkey FOREIGN KEY (card_id)
+        REFERENCES public.card (card_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT item_status_id_fkey FOREIGN KEY (status_id)
+        REFERENCES public.status (status_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.item_history
+
+-- DROP TABLE public.item_history;
+
+CREATE TABLE IF NOT EXISTS public.item_history
+(
+    date_modified timestamp with time zone DEFAULT now(),
+    status_id integer,
+    item_id uuid NOT NULL,
+    card_id uuid,
+    item_history_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    CONSTRAINT item_history_pkey PRIMARY KEY (item_history_id),
+    CONSTRAINT item_history_status_id_fkey FOREIGN KEY (status_id)
+        REFERENCES public.status (status_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.item_media_data
+
+-- DROP TABLE public.item_media_data;
+
+CREATE TABLE IF NOT EXISTS public.item_media_data
+(
+    item_media_data_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    item_id uuid NOT NULL,
+    media_data_id uuid NOT NULL,
+    CONSTRAINT item_media_data_pkey PRIMARY KEY (item_media_data_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.login
+
+-- DROP TABLE public.login;
+
+CREATE TABLE IF NOT EXISTS public.login
+(
+    password text COLLATE pg_catalog."default",
+    salt text COLLATE pg_catalog."default",
+    username text COLLATE pg_catalog."default",
+    login_id uuid NOT NULL,
+    user_id uuid NOT NULL,
+    CONSTRAINT login_pkey PRIMARY KEY (login_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.media_data
+
+-- DROP TABLE public.media_data;
+
+CREATE TABLE IF NOT EXISTS public.media_data
+(
+    data bytea,
+    file_extension text COLLATE pg_catalog."default",
+    media_data_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    filename text COLLATE pg_catalog."default",
+    CONSTRAINT media_data_pkey PRIMARY KEY (media_data_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.membership
+
+-- DROP TABLE public.membership;
+
+CREATE TABLE IF NOT EXISTS public.membership
+(
+    membership_id uuid NOT NULL,
+    group_id uuid,
+    CONSTRAINT membership_pkey PRIMARY KEY (membership_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.message
+
+-- DROP TABLE public.message;
+
+CREATE TABLE IF NOT EXISTS public.message
+(
+    body text COLLATE pg_catalog."default",
+    status text COLLATE pg_catalog."default",
+    message_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    owner_id uuid NOT NULL,
+    item_id uuid
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.permission
+
+-- DROP TABLE public.permission;
+
+CREATE TABLE IF NOT EXISTS public.permission
+(
+    type text COLLATE pg_catalog."default" NOT NULL DEFAULT 'NULL'::text,
+    action_id uuid,
+    permission_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    CONSTRAINT permission_pkey PRIMARY KEY (permission_id),
+    CONSTRAINT permission_action_fkey FOREIGN KEY (action_id)
+        REFERENCES public.action (action_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.plan
+
+-- DROP TABLE public.plan;
+
+CREATE TABLE IF NOT EXISTS public.plan
+(
+    name text COLLATE pg_catalog."default" DEFAULT 'free'::text,
+    plan_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    CONSTRAINT plan_pkey PRIMARY KEY (plan_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.role
+
+-- DROP TABLE public.role;
+
+CREATE TABLE IF NOT EXISTS public.role
+(
+    name text COLLATE pg_catalog."default",
+    description text COLLATE pg_catalog."default",
+    role_id uuid NOT NULL,
+    CONSTRAINT role_pkey PRIMARY KEY (role_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.role_permission
+
+-- DROP TABLE public.role_permission;
+
+CREATE TABLE IF NOT EXISTS public.role_permission
+(
+    role_permission_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    permission_id uuid NOT NULL,
+    role_id uuid NOT NULL,
+    CONSTRAINT role_permission_pkey PRIMARY KEY (role_permission_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.role_user_group
+
+-- DROP TABLE public.role_user_group;
+
+CREATE TABLE IF NOT EXISTS public.role_user_group
+(
+    role_user_group_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    role_id uuid NOT NULL,
+    group_id uuid NOT NULL,
+    user_id uuid NOT NULL
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.status
+
+-- DROP TABLE public.status;
+
+CREATE TABLE IF NOT EXISTS public.status
+(
+    status_id integer NOT NULL DEFAULT nextval('status_status_id_seq'::regclass),
+    name text COLLATE pg_catalog."default",
+    CONSTRAINT status_pkey PRIMARY KEY (status_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.subscriber_item
+
+-- DROP TABLE public.subscriber_item;
+
+CREATE TABLE IF NOT EXISTS public.subscriber_item
+(
+    card_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    subscriber_card_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    user_id uuid,
+    CONSTRAINT subscriber_card_pkey PRIMARY KEY (subscriber_card_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public.theme
+
+-- DROP TABLE public.theme;
+
+CREATE TABLE IF NOT EXISTS public.theme
+(
+    name text COLLATE pg_catalog."default",
+    theme_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    CONSTRAINT theme_pkey PRIMARY KEY (theme_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+-- Table: public."user"
+
+-- DROP TABLE public."user";
+
+CREATE TABLE IF NOT EXISTS public."user"
+(
+    first_name text COLLATE pg_catalog."default" DEFAULT ''::text,
+    last_name text COLLATE pg_catalog."default" DEFAULT ''::text,
+    email text COLLATE pg_catalog."default" NOT NULL,
+    address text COLLATE pg_catalog."default",
+    city text COLLATE pg_catalog."default",
+    zip text COLLATE pg_catalog."default",
+    cell text COLLATE pg_catalog."default",
+    phone text COLLATE pg_catalog."default",
+    active boolean DEFAULT true,
+    membership_id uuid,
+    user_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    display_name text COLLATE pg_catalog."default",
+    CONSTRAINT user_pkey PRIMARY KEY (user_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;

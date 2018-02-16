@@ -86,8 +86,17 @@ namespace ThreeDo.Repository
 			// DapperConnection from ConnectionFactory
 			using (var dbCon = GetDapperConnection)
 			{
-				dbCon.Open();
-				boards = dbCon.Query<Board>("SELECT * FROM public.board");
+                try
+                {
+                    dbCon.Open();
+                    boards = dbCon.Query<Board>("SELECT * FROM public.board");
+                }
+                catch (Exception ex)
+                {
+                    var s = ex.Message;
+                    boards = null;
+                }
+
 			}
 			return boards;
 		}

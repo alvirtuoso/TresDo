@@ -80,21 +80,30 @@ namespace ThreeDo.Repository
 		/// <param name="item">Item.</param>
 		public IEnumerable<Item> AddItemToCard(Item item)
 		{
-			IEnumerable<Item> items;
-			using (IDbConnection dbConnection = GetDapperConnection)
-			{
+			IEnumerable<Item> items = null;
+            try
+            {
+                using (IDbConnection dbConnection = GetDapperConnection)
+                {
 
-				var p = new DynamicParameters();
-				p.Add("_title", item.Title);
-				p.Add("_due_date", item.Due_Date);
-				p.Add("_description", item.Description);
-				p.Add("_card_id", item.Card_Id);
-				p.Add("_owner_id", item.Owner_Id);
-				p.Add("_modified_by_id", item.Modified_By_Id);
-				p.Add("_status_id", item.Status_Id);
-				items = dbConnection.Query<Item>("fn_add_item_to_card", p, commandType: CommandType.StoredProcedure);
+                    var p = new DynamicParameters();
+                    p.Add("_title", item.Title);
+                    p.Add("_due_date", item.Due_Date);
+                    p.Add("_description", item.Description);
+                    p.Add("_card_id", item.Card_Id);
+                    p.Add("_owner_id", item.Owner_Id);
+                    p.Add("_modified_by_id", item.Modified_By_Id);
+                    p.Add("_status_id", item.Status_Id);
+                    items = dbConnection.Query<Item>("fn_add_item_to_card", p, commandType: CommandType.StoredProcedure);
+                    //var l = dbConnection.Query<object>("fn_add_item_to_card", p, commandType: CommandType.StoredProcedure);
+                }
+            }
+            catch (Exception ex)
+            {
+                var m = ex.Message;
+                items = null;
+            }
 
-			}
 			return items;
 
 		}
