@@ -27,8 +27,8 @@ autom4te.cache/
 tarballs/
 test-results/
 Thumbs.db
-#appsettings.json
-#appsettings.Development.json
+appsettings.json
+appsettings.Development.json
 
 # Mac bundle stuff
 *.dmg
