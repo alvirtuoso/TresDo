@@ -61,16 +61,15 @@ namespace ThreeDo.Controllers
 			return custList;
 		}
 
-		// POST: api/user/create
-		[HttpPost("create")]
-		public User Create(string email, string display_name)
+		// POST: api/user/add
+		[HttpPost("add")]
+		public User Add(string email, string display_name)
 		{
 			User u = null;
 
 			if (ModelState.IsValid)
 			{
 				u = this.userRepo.Add(email, display_name);
-				//return RedirectToAction("Index");
 			}
 			return u;
 

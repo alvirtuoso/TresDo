@@ -28,9 +28,27 @@ namespace ThreeDo.Controllers
 			return boards;
 		}
 
+        // GET api/board/public
+        [HttpGet("public")]
+        public IEnumerable<Board> GetPublicBoard()
+        {
+            var boards = this.boardRepo.FindPublicBoards();
+
+            return boards;
+        }
+
+        // GET api/board/private
+        [HttpGet("private/{email}")]
+        public IEnumerable<Board> GetPrivateBoard(string email)
+        {
+            var boards = this.boardRepo.FindPrivateBoards(email);
+
+            return boards;
+        }
+
 		// POST: api/board/create
-		[HttpPost("create")]
-		public Board Create([FromBody]Board board)
+        [HttpPost("create")]
+        public Board Create([FromBody]Board board)
 		{
 			var b = new Board();
 			if (ModelState.IsValid)

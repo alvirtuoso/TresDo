@@ -399,6 +399,28 @@ AS $function$
 
 $function$;
 
+-- FUNCTION: public.fn_get_boards_by_email(text)
+
+-- DROP FUNCTION public.fn_get_boards_by_email(text);
+
+
+CREATE OR REPLACE FUNCTION public.fn_get_boards_by_email(
+	_email text)
+ RETURNS SETOF board
+ LANGUAGE 'plpgsql'
+AS $function$
+
+    DECLARE 
+     ouserid UUID:= (Select user_id From public.user Where email = _email);
+   	 -- counter integer = (Select count(*) from public.user u Where u.email = _email);
+    BEGIN
+	
+        RETURN QUERY Select * from public.board b WHERE b.owner_id = ouserid;
+    END;
+    
+
+$function$;
+
 -- extension to use get_random_UUID()
 CREATE EXTENSION IF NOT EXISTS pgcrypto; 
 

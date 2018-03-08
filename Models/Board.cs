@@ -9,8 +9,8 @@ namespace ThreeDo.Models
 		public Board()
 		{
 		}
-		[Key]
-		public Guid Board_Id { get; set; }
+		
+		public Guid? Board_Id { get; set; }
 
 		public Guid? Owner_Id
 		{
@@ -28,7 +28,7 @@ namespace ThreeDo.Models
 			get;
 			set;
 		}
-		public Guid Classification_Id
+		public Guid? Classification_Id
 		{
 			get;
 			set;

@@ -15,6 +15,10 @@ namespace ThreeDo.Models
 		private byte[] dataByte;
 		private Guid media_data_id;
 
+        public Guid Item_Media_Data_Id{
+            get;
+            set;
+        }
 		public Guid Media_Data_Id
 		{
 			get{
@@ -32,6 +36,7 @@ namespace ThreeDo.Models
 			get;
 			set;
 		}
+
 		public Guid Item_Id
 		{
 			get;

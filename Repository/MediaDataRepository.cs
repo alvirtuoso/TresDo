@@ -99,9 +99,19 @@ namespace ThreeDo.Repository
 			}
 		}
 
-		public void Remove(Guid id)
+        /// <summary> 
+        /// Remove the specified item_media_data_id in the item_media_data table. The media data isn't deleted from the media_data table in database.
+        /// </summary>
+        /// <returns>The remove.</returns>
+        /// <param name="item_media_data_id">Item media data identifier.</param>
+        public void Remove(Guid item_media_data_id)
 		{
-			throw new NotImplementedException();
+            using (IDbConnection conn = GetDapperConnection)
+            {
+                conn.Execute("DELETE FROM public.item_media_data WHERE item_media_data_id = @item_media_data_id"
+                             , new { item_media_data_id = item_media_data_id });
+            }            
+	
 		}
 
 		public void Update(MediaData mFile)

@@ -81,7 +81,7 @@ namespace ThreeDo.Repository
 		}
 		public IEnumerable<Board> FindAll()
 		{
-
+            // 
 			IEnumerable<Board> boards;
 			// DapperConnection from ConnectionFactory
 			using (var dbCon = GetDapperConnection)
@@ -100,5 +100,52 @@ namespace ThreeDo.Repository
 			}
 			return boards;
 		}
+
+        public IEnumerable<Board> FindPublicBoards()
+        {
+            // faad67d2-7ec6-494e-a4ef-ac126481f77f is public classification_id
+            IEnumerable<Board> boards;
+            // DapperConnection from ConnectionFactory
+            using (var dbCon = GetDapperConnection)
+            {
+                try
+                {
+                    dbCon.Open();
+                    boards = dbCon.Query<Board>("SELECT * FROM public.board WHERE classification_id = 'faad67d2-7ec6-494e-a4ef-ac126481f77f'");
+                }
+                catch (Exception ex)
+                {
+                    var s = ex.Message;
+                    boards = null;
+                }
+
+            }
+            return boards;
+        }
+
+        public IEnumerable<Board>FindPrivateBoards(String email)
+        {
+            IEnumerable<Board> boards;
+            // DapperConnection from ConnectionFactory
+            using (var dbCon = GetDapperConnection)
+            {
+                try
+                {
+                    using (IDbConnection dbConnection = GetDapperConnection)
+                    {
+                        var p = new DynamicParameters();
+                        p.Add("_email", email);
+
+                        boards = dbConnection.Query<Board>("fn_get_boards_by_email", p, commandType: CommandType.StoredProcedure).AsList();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    var s = ex.Message;
+                    boards = null;
+                }
+            }
+            return boards;
+        }
 	}
 }

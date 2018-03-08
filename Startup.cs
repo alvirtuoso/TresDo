@@ -32,7 +32,7 @@ namespace ThreeDo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddMvc();
+            
             // Add service and create Policy with options
             services.AddCors(options =>
             {
@@ -51,8 +51,10 @@ namespace ThreeDo
             ConnectionSetting.DefaultConnection = Configuration.GetConnectionString("DefaultConnection");
 
             // Add the MVC feature
-            services.AddMvcCore()
-                    .AddJsonFormatters();
+            //services.AddMvcCore()
+                    //.AddJsonFormatters();
+
+            services.AddMvc();
 
             //  Identity Server 
             //services.AddIdentityServer()
