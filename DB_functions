@@ -86,11 +86,11 @@ $function$;
 -- DROP FUNCTION public.fn_add_card(character varying, uuid, uuid, boolean);
 
 CREATE OR REPLACE FUNCTION public.fn_add_card(
-	_name character varying,
-	_owner_id uuid,
-	_board_id uuid,
-	_active boolean)
-    RETURNS TABLE(name text, date_created timestamp with time zone, active boolean, sort_order integer, card_id uuid, board_id uuid, owner_id uuid)
+    _name character varying,
+    _owner_id uuid,
+    _board_id uuid,
+    _active boolean)
+    RETURNS SETOF card 
     LANGUAGE 'plpgsql'
     COST 100.0
     VOLATILE NOT LEAKPROOF 
