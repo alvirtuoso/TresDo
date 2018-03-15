@@ -31,18 +31,25 @@ namespace ThreeDo.Repository
 		public Card Add(Card card)
 		{
 			var c = new Card();
-			using (IDbConnection dbConnection = GetDapperConnection)
-			{
-
-				var p = new DynamicParameters();
-				p.Add("_name", card.Name);
-				p.Add("_owner_id", card.Owner_Id);
-				p.Add("_board_id", card.Board_Id);
-				p.Add("_active", card.Active);
-
-				c = dbConnection.Query<Card>("fn_add_card", p, commandType: CommandType.StoredProcedure).AsList<Card>()[0];
-		
-			}
+            try
+            {
+				using (IDbConnection dbConnection = GetDapperConnection)
+				{
+					
+					var p = new DynamicParameters();
+					p.Add("_name", card.Name);
+					p.Add("_owner_id", card.Owner_Id);
+					p.Add("_board_id", card.Board_Id);
+					p.Add("_active", card.Active);
+					
+                    c = dbConnection.Query<Card>("fn_add_card", p, commandType: CommandType.StoredProcedure).AsList<Card>()[0];
+					
+				}
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
 			return c;
 
 		}

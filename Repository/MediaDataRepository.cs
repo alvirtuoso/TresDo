@@ -36,6 +36,7 @@ namespace ThreeDo.Repository
 			{
 				var p = new DynamicParameters();
 				p.Add("_item_id", itemId);
+                // The fn_get_media_by_item_id will return metadata of MediaData but not the byte array of the MediaData
 				dataList = dbCon.Query<MediaData>("fn_get_media_by_item_id", p, commandType: CommandType.StoredProcedure).AsList<MediaData>();
 			}
 

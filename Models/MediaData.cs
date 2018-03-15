@@ -12,7 +12,7 @@ namespace ThreeDo.Models
 		{
 		}
 
-		private byte[] dataByte;
+		//private byte[] dataByte;
 		private Guid media_data_id;
 
         public Guid Item_Media_Data_Id{
@@ -31,7 +31,8 @@ namespace ThreeDo.Models
 			get;
 			set;
 		}
-		public string FileExtension
+
+        public string File_Extension
 		{
 			get;
 			set;
@@ -45,19 +46,21 @@ namespace ThreeDo.Models
 
 		public byte[] DataByte
 		{
-			get{
-				// Load data only when needed
-				if (this.dataByte == null)
-				{
-					this.dataByte = new MediaDataRepository().GetData(this.media_data_id);
-				}
+            get;
+            set;
+			//get{
+			//	// Load data only when needed
+			//	if (this.dataByte == null)
+			//	{
+			//		this.dataByte = new MediaDataRepository().GetData(this.media_data_id);
+			//	}
 	
-				return this.dataByte;
-			}
-			set
-			{
-				this.dataByte = value;
-			}
+			//	return this.dataByte;
+			//}
+			//set
+			//{
+			//	this.dataByte = value;
+			//}
 		}
 
 	}

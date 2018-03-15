@@ -11,7 +11,7 @@ using ThreeDo.Repository;
 namespace ThreeDo.Controllers
 {
     [Route("api/[controller]")]
-    public class MediaDataController
+    public class MediaDataController: Controller
     {
         private readonly MediaDataRepository mediaRepo = new MediaDataRepository();
 
@@ -25,7 +25,18 @@ namespace ThreeDo.Controllers
             //var custRepo = new cardRepository();
             var mList = this.mediaRepo.GetMediaDataByItemId(itemId);
 
+
             return mList;
+        }
+
+        [HttpGet("blob/{mediaDataId}/{fileExt}")]
+        public ActionResult GetMediaByteArray(Guid mediaDataId, String fileExt)
+        {
+            //var custRepo = new cardRepository();
+            var bArray = this.mediaRepo.GetData(mediaDataId);
+            var contType = GetContentType(fileExt);
+            var result = File(bArray, contType);
+            return result;
         }
 
         // DELETE: api/mediadata/deletemedia/{item_id}
@@ -76,13 +87,15 @@ namespace ThreeDo.Controllers
 						mediaID = this.mediaRepo.SaveItemMedia(Path.GetExtension(file.FileName), file.FileName, byteArray);
 
 						result = mediaID.ToString(); 
-				}
+    				}
 					// Option: copy to server temp file
 					//using (var stream = new FileStream(filePath, FileMode.Create))
 					//{
 					//	await formFile.CopyToAsync(stream);
 					//}
-				}
+                }else{
+                    Content("filename not present");
+                }
 			}
 			catch(Exception ex)
 			{
@@ -91,6 +104,31 @@ namespace ThreeDo.Controllers
 
 			return new JsonResult(result);
 		}
+
+        private string GetContentType(string fileExt)
+        {
+            var types = GetMimeTypes();
+            //var ext = Path.GetExtension(path).ToLowerInvariant();
+            return types[fileExt];
+        }
+
+        private Dictionary<string, string> GetMimeTypes()
+        {
+            return new Dictionary<string, string>
+            {
+                {".txt", "text/plain"},
+                {".pdf", "application/pdf"},
+                {".doc", "application/vnd.ms-word"},
+                {".docx", "application/vnd.ms-word"},
+                {".xls", "application/vnd.ms-excel"},
+                {".xlsx", "application/vnd.openxmlformatsofficedocument.spreadsheetml.sheet"},
+                {".png", "image/png"},
+                {".jpg", "image/jpeg"},
+                {".jpeg", "image/jpeg"},
+                {".gif", "image/gif"},
+                {".csv", "text/csv"}
+            };
+        }
 	}
 
 }
