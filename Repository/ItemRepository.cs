@@ -78,9 +78,9 @@ namespace ThreeDo.Repository
 		/// </summary>
 		/// <returns>IEnumerable of Item type.</returns>
 		/// <param name="item">Item.</param>
-		public IEnumerable<Item> AddItemToCard(Item item)
+		public Item AddItemToCard(Item item)
 		{
-			IEnumerable<Item> items = null;
+            Item result = new Item();
             try
             {
                 using (IDbConnection dbConnection = GetDapperConnection)
@@ -94,17 +94,17 @@ namespace ThreeDo.Repository
                     p.Add("_owner_id", item.Owner_Id);
                     p.Add("_modified_by_id", item.Modified_By_Id);
                     p.Add("_status_id", item.Status_Id);
-                    items = dbConnection.Query<Item>("fn_add_item_to_card", p, commandType: CommandType.StoredProcedure);
+                    result = dbConnection.Query<Item>("fn_add_item_to_card", p, commandType: CommandType.StoredProcedure).AsList<Item>()[0];
                     //var l = dbConnection.Query<object>("fn_add_item_to_card", p, commandType: CommandType.StoredProcedure);
                 }
             }
             catch (Exception ex)
             {
                 var m = ex.Message;
-                items = null;
+                item = null;
             }
 
-			return items;
+            return result;
 
 		}
 		/// <summary>

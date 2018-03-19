@@ -70,7 +70,7 @@ namespace ThreeDo.Repository
 			using (IDbConnection dbConnection = GetDapperConnection)
 			{
 				dbConnection.Open();
-				dbConnection.Query("UPDATE public.card SET name = @Name, date_created  = @Date_Created, description= @Description, active=@Active, board_id=@Board_id, owner_id=@Owner_id WHERE card_id = @Card_id", card);
+				dbConnection.Query("UPDATE public.card SET name = @Name, date_created  = @Date_Created, active=@Active, board_id=@Board_id, owner_id=@Owner_id WHERE card_id = @Card_id", card);
 				//Query<Card>("fn_update_card", p, commandType: CommandType.StoredProcedure);
 			}
 		}

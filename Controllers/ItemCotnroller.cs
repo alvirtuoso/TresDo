@@ -52,16 +52,16 @@ namespace ThreeDo.Controllers
 
 		// POST: api/item/createforcard items
 		[HttpPost("createforcard")]
-		public IEnumerable<Item> CreateForCard([FromBody]Item item)
+		public Item CreateForCard([FromBody]Item item)
 		{
-			IEnumerable<Item> items = new List<Item>();
+            Item result = new Item();
 			if (ModelState.IsValid)
 			{
-				items = this.itemRepo.AddItemToCard(item);
+				result = this.itemRepo.AddItemToCard(item);
 				//return RedirectToAction("Index");
 			}
 
-			return items;
+            return result;
 		}
 
 		// Put: api/item/editItemCard?item_id=123dec32&card_id=45212detc
