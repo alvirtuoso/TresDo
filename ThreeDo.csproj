@@ -26,6 +26,7 @@
   <ItemGroup>
     <Compile Remove="Models\DomainModel\DataEventRecord.cs" />
     <Compile Remove="Models\DomainModel\SourceInfo.cs" />
+    <Compile Remove="Repository\Initial_Data.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\SD\Downloads\AspNetCoreMultipleProject-master\src\DomainModel\DomainModel.csproj" />

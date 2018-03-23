@@ -1,3 +1,46 @@
+CREATE OR REPLACE FUNCTION public.gen_random_uuid(
+    )
+    RETURNS uuid
+    LANGUAGE 'c'
+    COST 1.0
+    VOLATILE NOT LEAKPROOF 
+AS '$libdir/pgcrypto', 'pg_random_uuid';
+
+-- FUNCTION: public.fn_add_board(character varying, uuid, uuid)
+
+-- DROP FUNCTION public.fn_add_board(character varying, uuid, uuid);
+
+CREATE OR REPLACE FUNCTION public.fn_add_board(
+    _title character varying,
+    _owner_id uuid,
+    _classification_id uuid)
+    RETURNS TABLE(board_id uuid, title text, owner_id uuid, date_created timestamp with time zone, classification_id uuid, initial_card_id uuid)
+    LANGUAGE 'plpgsql'
+    COST 100.0
+    VOLATILE NOT LEAKPROOF 
+    ROWS 1000.0
+AS $function$
+
+    DECLARE 
+     oboard_id UUID:= gen_random_uuid();
+     ocard_id UUID:= gen_random_uuid();
+
+    BEGIN
+      INSERT INTO public.board 
+        VALUES (_title, now(), oboard_id, _owner_id, _classification_id);     
+
+      INSERT INTO public.card(card_id, name, date_created, active, board_id, owner_id, sort_order)
+      VALUES (ocard_id, 'New Card', now(), true, oboard_id, _owner_id, 0); -- we are creating a new card, so sort_order or index is 0 
+      
+      RETURN QUERY SELECT c.board_id, b.title, b.owner_id, b.date_created, b.classification_id, c.card_id from public.board b
+        JOIN public.card c on b.board_id = c.board_id 
+      WHERE b.board_id = oboard_id;
+      
+    END;
+    
+
+$function$;
+
 -- Table: public.account
 
 -- DROP TABLE public.account;
@@ -75,6 +118,7 @@ TABLESPACE pg_default;
 -- Table: public.card
 
 -- DROP TABLE public.card;
+CREATE SEQUENCE card_order_seq;
 
 CREATE TABLE IF NOT EXISTS public.card
 (
@@ -160,9 +204,26 @@ WITH (
 )
 TABLESPACE pg_default;
 
+-- Table: public.status
+
+-- DROP TABLE public.status;
+CREATE SEQUENCE status_status_id_seq;
+
+CREATE TABLE IF NOT EXISTS public.status
+(
+    status_id integer NOT NULL DEFAULT nextval('status_status_id_seq'::regclass),
+    name text COLLATE pg_catalog."default",
+    CONSTRAINT status_pkey PRIMARY KEY (status_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
 -- Table: public.item
 
 -- DROP TABLE public.item;
+CREATE SEQUENCE item_order_seq;
 
 CREATE TABLE IF NOT EXISTS public.item
 (

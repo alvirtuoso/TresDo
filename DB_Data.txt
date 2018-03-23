@@ -1,0 +1,11 @@
+﻿-- Initial data needed.
+insert into public.classification
+Values('public', 'faad67d2-7ec6-494e-a4ef-ac126481f77f');
+
+insert into public.classification
+Values('team', '30c968cb-5686-444d-b138-21d90d15f1ca');
+
+-- Clean up card and boards
+delete from card;
+delete from board;
+select * from board

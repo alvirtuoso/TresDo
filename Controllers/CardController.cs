@@ -28,7 +28,7 @@ namespace ThreeDo.Controllers
 		[HttpGet("{boardid}")]
 		public IEnumerable<Card> FindCardsByBoardId(Guid boardId)
 		{
-			var cards = this.cardRepo.FindByBoardId(boardId);
+ 			var cards = this.cardRepo.FindByBoardId(boardId);
 			return cards;
 		}
 
