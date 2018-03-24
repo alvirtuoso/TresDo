@@ -1,4 +1,6 @@
-﻿// Start Postgres server -        start @ terminal	initdb /usr/local/var/postgres -E utf8
+﻿local testing "DefaultConnection": "User ID=postgres;Password=pgadmin;Host=localhost;Port=5432;Database=amercado;Pooling=true;" 
+
+// Start Postgres server -        start @ terminal	initdb /usr/local/var/postgres -E utf8
 // *********** NPSQL entity framework ******************
 1 search for Npgsql.EntityFrameworkCore  in nuget
 2 services.AddEntityFramework()

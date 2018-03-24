@@ -421,5 +421,5 @@ AS $function$
 $function$;
 
 -- extension to use get_random_UUID()
-CREATE EXTENSION IF NOT EXISTS pgcrypto; 
+-- CREATE EXTENSION IF NOT EXISTS pgcrypto; 
 
