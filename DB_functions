@@ -25,7 +25,7 @@ AS $function$
       INSERT INTO public.item(item_id, date_created, due_date, title, description, card_id, owner_id, modified_by_id, status_id, date_modified, sort_order)
       VALUES (oitem_id, now(), _due_date, _title, _description, _card_id, _owner_id, _modified_by_id, _status_id, now(), sort_index);
       
-      RETURN QUERY SELECT * FROM public.item i WHERE i.card_id = _card_id;
+      RETURN QUERY SELECT * FROM public.item i WHERE i.item_id = oitem_id;
       
     END;
     
